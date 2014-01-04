@@ -34,7 +34,7 @@ NULL
 ##' @examples download_KEGGfile(pathway_id="00010",specis='hsa')
 download_KEGGfile<-function(pathway_id="00010",specis='hsa',target_dir=getwd()) {
 	if (pathway_id=='all') { #download files for all pathway baesd on KEGG.db package
-		require(KEGG.db)
+#		require(KEGG.db)
 		keggpathway2gene <- as.list(KEGG.db::KEGGPATHID2EXTID)
 		pathway_id<-names(keggpathway2gene)[grep(specis,names(keggpathway2gene))]
 	} else {
@@ -65,8 +65,8 @@ parse_XMLfile<-function(pathway_id,specis,database_dir=getwd()) {
 		print(paste("Skip global maps:",pathway_id,sep=""))
 		return(NULL)
 	}
-	require(XML)
-	inter1<-xmlTreeParse(paste(database_dir,"/",specis,pathway_id,".xml",sep=""),useInternal=TRUE)
+#	require(XML)
+	inter1<-xmlTreeParse(paste(database_dir,"/",specis,pathway_id,".xml",sep=""),useInternalNodes=TRUE)
 	inter2<-getNodeSet(inter1,"//entry")
 	inter3<-lapply(inter2,  function(xxx) xmlGetAttr(xxx,  "name"))
 	inter4<-lapply(inter2,  function(xxx) xmlGetAttr(xxx,  "type"))
@@ -79,8 +79,9 @@ parse_XMLfile<-function(pathway_id,specis,database_dir=getwd()) {
 	inter10<-sapply(inter5,  function(xxx) xmlGetAttr(xxx,  "name"))
 	result<-NULL
 	for (i in 1:length(inter4)) {
-		if (inter4[[i]]=="gene" & inter_graphic_type[[i]]!="line") {
+		if ((inter4[[i]]=="gene" | inter4[[i]]=="compound") & inter_graphic_type[[i]]!="line") {
 			temp<-strsplit(inter3[[i]]," ")[[1]]
+			temp<-gsub("cpd:","",temp)
 			name<-strsplit(inter10[[i]],",")[[1]][1]
 			name<-gsub('\\.\\.\\.',"",name)
 			for (n in 1:length(temp)) {
@@ -130,6 +131,7 @@ plot_profile<-function(gene_expr,pathway_name,KEGG_database,groups,bg_col="white
 	}
 	genes_kept <- if (missing(genes_kept)) 
 				"foldchange" else match.arg(genes_kept)
+	showCpdLegend<-F
 	if (missing(groups)) groups<-rep(1,ncol(gene_expr))
 	groups<-factor(groups,levels=unique(groups))
 	if (missing(line_col)) line_col<-rainbow(length(unique(groups)))
@@ -155,8 +157,8 @@ plot_profile<-function(gene_expr,pathway_name,KEGG_database,groups,bg_col="white
 	}
 	
 	#plot KEGG pic
-	require(png)
-	require(TeachingDemos)
+#	require(png)
+#	require(TeachingDemos)
 	img  <-  readPNG(paste(database_dir,"/",pathway_name,".png",sep=""))
 	width<-ncol(img)
 	height<-nrow(img)
@@ -169,6 +171,7 @@ plot_profile<-function(gene_expr,pathway_name,KEGG_database,groups,bg_col="white
 	plot(c(0,width),c(0,height),  type='n',xlab="",ylab="")
 	rasterImage(img,  0,  0,  width,  height,interpolate=F)
 	
+	x=y=NULL #useless, just for R CMD check
 	#plot gene profile in KEGG pic
 	result_genes<-as.data.frame(KEGG_database[which(KEGG_database[,1] %in% genes),],stringsAsFactors=F)
 	colnames(result_genes)<-c("genes","x","y","width","height","name")
@@ -193,27 +196,47 @@ plot_profile<-function(gene_expr,pathway_name,KEGG_database,groups,bg_col="white
 				ChosedGene<-temp[[xx]][which.max(apply(data.frame(gene_expr[temp[[xx]][,1],]),1,function(x) max(abs(x)))),1]
 			}
 			ChosedGene<-temp[[xx]][which(temp[[xx]][,1]==ChosedGene),]
-		} else {ChosedGene<-temp[[xx]]}	
-		i_max<-ncol(bg_col)
-		for (i in 1:i_max) {
-			plot_polygon(ChosedGene=ChosedGene,i=i,i_max=i_max,col=bg_col,height=height,err_x_location=err_x_location,err_y_location=err_y_location,magnify=magnify)
-		}
-		if (type == "lines") {
-			ChosedGeneProfile<-as.matrix(gene_expr[as.character(ChosedGene[,1]),])
-			ChosedGeneProfile<-sapply(split(ChosedGeneProfile,groups),function(x) x)		
-			gene_dist<-gene_expr[as.character(ChosedGene[,1]),]
-			gene_dist<-range(gene_dist,na.rm=T)[2]-range(gene_dist,na.rm=T)[1]
-			if (is.na(max_dist) | gene_dist==0) {y_ratio<-1} else {
-				y_ratio<-gene_dist/max_dist
-				if (y_ratio>1) {y_ratio<-1}
+		} else {ChosedGene<-temp[[xx]]}
+		if (length(grep("^[cC]",as.character(ChosedGene[,1])))) { #cpd
+			showCpdLegend<-T
+			if (type == "lines") {
+				ChosedGeneProfile<-as.matrix(gene_expr[as.character(ChosedGene[,1]),])
+				ChosedGeneProfile<-sapply(split(ChosedGeneProfile,groups),function(x) x)		
+				gene_dist<-gene_expr[as.character(ChosedGene[,1]),]
+				gene_dist<-range(gene_dist,na.rm=T)[2]-range(gene_dist,na.rm=T)[1]
+				if (is.na(max_dist) | gene_dist==0) {y_ratio<-1} else {
+					y_ratio<-gene_dist/max_dist
+					if (y_ratio>1) {y_ratio<-1}
+				}
+				pie_radius<-4*magnify+4*magnify*(ChosedGeneProfile-min(ChosedGeneProfile))/gene_dist
+				pie_col<-rep(line_col,nrow(pie_radius))
+				pie_radius<-as.vector(t(pie_radius))
+				plot_pie(ChosedGene=ChosedGene,ChosedGeneProfile=rep(1,nrow(ChosedGeneProfile)*ncol(ChosedGeneProfile)),height=height,err_x_location=err_x_location,err_y_location=err_y_location,magnify=magnify,radius=pie_radius,col=pie_col,lty=0)
+			} else {
+				plot_pie(ChosedGene=ChosedGene,ChosedGeneProfile=abs(as.matrix(gene_expr[as.character(ChosedGene[,1]),])),height=height,err_x_location=err_x_location,err_y_location=err_y_location,magnify=magnify,col=bg_col)
 			}
-			old_par <- par(no.readonly = TRUE)
-			subplot(matplot(ChosedGeneProfile,main="",type="l",xlab="",ylab="",xaxt="n",yaxt="n",bty="n",col=line_col,lty=1,lwd=lwd),c(ChosedGene[,2]-ChosedGene[,4]/2*magnify+err_x_location,ChosedGene[,2]+ChosedGene[,4]*magnify/2+err_x_location),c(height-ChosedGene[,3]-ChosedGene[,5]*y_ratio/2*magnify-err_y_location,height-ChosedGene[,3]+ChosedGene[,5]*y_ratio/2*magnify-err_y_location))
-			par(old_par)
+		} else { #gene
+			i_max<-ncol(bg_col)
+			for (i in 1:i_max) {
+				plot_polygon(ChosedGene=ChosedGene,i=i,i_max=i_max,col=bg_col,height=height,err_x_location=err_x_location,err_y_location=err_y_location,magnify=magnify)
+			}
+			if (type == "lines") {
+				ChosedGeneProfile<-as.matrix(gene_expr[as.character(ChosedGene[,1]),])
+				ChosedGeneProfile<-sapply(split(ChosedGeneProfile,groups),function(x) x)		
+				gene_dist<-gene_expr[as.character(ChosedGene[,1]),]
+				gene_dist<-range(gene_dist,na.rm=T)[2]-range(gene_dist,na.rm=T)[1]
+				if (is.na(max_dist) | gene_dist==0) {y_ratio<-1} else {
+					y_ratio<-gene_dist/max_dist
+					if (y_ratio>1) {y_ratio<-1}
+				}
+				old_par <- par(no.readonly = TRUE)
+				subplot(matplot(ChosedGeneProfile,main="",type="l",xlab="",ylab="",xaxt="n",yaxt="n",bty="n",col=line_col,lty=1,lwd=lwd),c(ChosedGene[,2]-ChosedGene[,4]/2*magnify+err_x_location,ChosedGene[,2]+ChosedGene[,4]*magnify/2+err_x_location),c(height-ChosedGene[,3]-ChosedGene[,5]*y_ratio/2*magnify-err_y_location,height-ChosedGene[,3]+ChosedGene[,5]*y_ratio/2*magnify-err_y_location))
+				par(old_par)
+			}
+			plot_polygon(ChosedGene=ChosedGene,col=as.data.frame(NULL),i=1,i_max=1,height=height,err_x_location=err_x_location,err_y_location=err_y_location,magnify=magnify,border=border_col[as.character(ChosedGene[,1]),1],lty=1,lwd=0.5)
+			
+			text(ChosedGene[,2],height-ChosedGene[,3],labels=ChosedGene[,6],cex=text_cex,col=text_col[as.character(ChosedGene[,1]),1])
 		}
-		plot_polygon(ChosedGene=ChosedGene,col=as.data.frame(NULL),i=1,i_max=1,height=height,err_x_location=err_x_location,err_y_location=err_y_location,magnify=magnify,border=border_col[as.character(ChosedGene[,1]),1],lty=1,lwd=0.5)
-
-		text(ChosedGene[,2],height-ChosedGene[,3],labels=ChosedGene[,6],cex=text_cex,col=text_col[as.character(ChosedGene[,1]),1])
 		return_expr<-rbind(return_expr,c(ChosedGene[,1],ChosedGene[,6],gene_expr[as.character(ChosedGene[,1]),]))
 	}
 	if (type == "lines") {
@@ -221,6 +244,12 @@ plot_profile<-function(gene_expr,pathway_name,KEGG_database,groups,bg_col="white
 		if (!(is.na(max_dist))) {
 			polygon(c(width-66,width-20,width-20,width-66),c(height-60,height-60,height-77,height-77),border="grey")
 			text(width-43,height-68.5,round(max_dist,2),cex=text_cex)
+		}
+		if (showCpdLegend) {
+			groupNumber<-length(unique(groups))
+			numberInEachGroup<-ncol(gene_expr)/groupNumber
+			cpdLegendLabels<-colnames(gene_expr)[rep((1:numberInEachGroup),each=groupNumber)+(0:(groupNumber-1)*numberInEachGroup)]
+			pieGlyph2(x=rep(1,ncol(gene_expr)), xpos=width-80,ypos=height-120,radius=15*magnify,labels=cpdLegendLabels,lwd=0.2,col=line_col,cex=text_cex)
 		}
 	}
 	dev.off()
@@ -254,6 +283,15 @@ plot_profile<-function(gene_expr,pathway_name,KEGG_database,groups,bg_col="white
 ##' pho_expr<-pho_expr[which(temp==0),]
 ##' col<-col_by_value(pho_expr,col=colorRampPalette(c('green','black','red'))(1024),range=c(-6,6))
 ##' temp<-plot_pathway(pho_expr,type="bg",bg_col=col,text_col="white",magnify=1.2,specis='hsa',database_dir=system.file("extdata",package="KEGGprofile"),pathway_id="04110")
+##' #Compound and gene data
+##' set.seed(124)
+##' testData1<-rbind(rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6))
+##' row.names(testData1)<-c("4967","55753","1743","8802","47","50","C15972","C16255")
+##' colnames(testData1)<-c("Control0","Control2","Control5","Sample0","Sample2","Sample5")
+##' temp<-plot_pathway(testData1,type="lines",line_col=c("brown1","seagreen3"),groups=c(rep("Control",3),rep("Sample",3)),magnify=1.2,specis='hsa',database_dir=system.file("extdata",package="KEGGprofile"),pathway_id="00020",max_dist=2)
+##' testData2<-testData1[,4:6]-testData1[,1:3]
+##' col<-col_by_value(testData2,col=colorRampPalette(c('green','black','red'))(1024),range=c(-2,2))
+##' temp<-plot_pathway(testData2,type="bg",bg_col=col,text_col="white",magnify=1.2,specis='hsa',database_dir=system.file("extdata",package="KEGGprofile"),pathway_id="00020")
 plot_pathway<-function(gene_expr,line_col,groups,pathway_id="00010",specis="hsa",pathway_min=5,database_dir=getwd(),...) {
 	if ((!file.exists(paste(database_dir,"/",specis,pathway_id,".xml",sep=""))) | (!file.exists(paste(database_dir,"/",specis,pathway_id,".png",sep="")))) {download_KEGGfile(pathway_id=pathway_id,specis=specis,target_dir=database_dir)}
 	XML2data<-parse_XMLfile(pathway_id=pathway_id,specis=specis,database_dir=database_dir)
@@ -266,6 +304,70 @@ plot_polygon<-function(ChosedGene,i,i_max,col,height,err_x_location,err_y_locati
 	polygon(c(ChosedGene[,2]-ChosedGene[,4]/2*magnify+ChosedGene[,4]/i_max*(i-1)*magnify+err_x_location,ChosedGene[,2]-ChosedGene[,4]/2*magnify+ChosedGene[,4]/i_max*i*magnify+err_x_location,ChosedGene[,2]-ChosedGene[,4]/2*magnify+ChosedGene[,4]/i_max*i*magnify+err_x_location,ChosedGene[,2]-ChosedGene[,4]/2*magnify+ChosedGene[,4]/i_max*(i-1)*magnify+err_x_location),
 			c(height-ChosedGene[,3]-ChosedGene[,5]/2*magnify-err_y_location,height-ChosedGene[,3]-ChosedGene[,5]/2*magnify-err_y_location,height-ChosedGene[,3]+ChosedGene[,5]/2*magnify-err_y_location,height-ChosedGene[,3]+ChosedGene[,5]/2*magnify-err_y_location)
 			,col=col[as.character(ChosedGene[,1]),i],border=border,...)
+}
+
+plot_pie<-function(ChosedGeneProfile,ChosedGene,height,col=NULL,err_x_location,err_y_location,magnify,radius=ChosedGene[,4]*magnify,...) {
+	if (is.null(col)) {col<-col[as.character(ChosedGene[,1]),]}
+	pieGlyph2(x=ChosedGeneProfile, xpos=ChosedGene[,2]+err_x_location,ypos=height-ChosedGene[,3]-err_y_location,radius=radius,labels="",lwd=0.2,col=col,...)
+}
+
+pieGlyph2<-function (x, xpos, ypos, labels = names(x), edges = 200, radius = 0.8, clockwise=T,init.angle = if (clockwise) 90 else 0,
+		density = NULL, angle = 45, col = NULL, border = NULL, lty = NULL, lwd = NULL,
+		main = NULL, ...) 
+{
+	if (!is.numeric(x) || any(is.na(x) | x <= 0)) 
+		stop("pie: `x' values must be positive.")
+	if (is.null(labels)) 
+		labels <- as.character(1:length(x))
+	x <- c(0, cumsum(x)/sum(x))
+	dx <- diff(x)
+	nx <- length(dx)
+	if (is.null(col)) 
+		col <- if (is.null(density)) 
+					c("lightblue", "mistyrose", "lightcyan", "lavender", 
+							"cornsilk", "white")
+				else par("fg")
+	if (!is.null(col)) 
+		col <- rep(col, length.out = nx)
+	if (!is.null(border)) 
+		border <- rep(border, length.out = nx)
+	if (!is.null(lty)) 
+		lty <- rep(lty, length.out = nx)
+	if (!is.null(lwd)) 
+		lwd <- rep(lwd, length.out = nx)
+	if (!is.null(angle)) 
+		angle <- rep(angle, length.out = nx)
+	if (!is.null(density)) 
+		density <- rep(density, length.out = nx)
+	
+	if (length(radius)==1) {
+		radius<-rep(radius,nx)
+	}
+	
+	for (i in 1:nx) {
+		n <- max(2, floor(edges * dx[i]))
+		
+		twopi <- if (clockwise) 
+					-2 * pi
+				else 2 * pi
+		t2p <- twopi * seq(x[i], x[i + 1], length = n)+ init.angle * pi/180
+#		xc <- c(cos(t2p), 0) * radius + xpos
+#		yc <- c(sin(t2p), 0) * radius + ypos
+		xc <- c(cos(t2p), 0) * radius[i] + xpos
+		yc <- c(sin(t2p), 0) * radius[i] + ypos
+		polygon(xc, yc, density = density[i], angle = angle[i], 
+				border = border[i], col = col[i], lty = lty[i],lwd=lwd[i])
+		t2p <- twopi * mean(x[i + 0:1])+ init.angle * pi/180
+		xc <- cos(t2p) * radius[i] * c(1, 1.1, 1.2) + xpos
+		yc <- sin(t2p) * radius[i] * c(1, 1.1, 1.2) + ypos
+		lab <- as.character(labels[i])
+		if (!is.na(lab) && nzchar(lab)) {
+#			lines(xc[1:2], yc[1:2])
+			text(xc[3], yc[3], labels[i], xpd = TRUE, adj = ifelse(xc < 
+									xpos, 1, ifelse(xc == xpos, 0.5, 0)), ...)
+		}
+	}
+	invisible(NULL)
 }
 
 ##' col_by_value
@@ -327,7 +429,7 @@ col_by_value<-function(x,col,range=NA,breaks=NA) {
 ##' genes<-names(rev(sort(pho_sites_count[,1]))[1:300])
 ##' pho_KEGGresult<-find_enriched_pathway(genes,specis='hsa')
 find_enriched_pathway<-function(gene,specis="hsa",returned_pvalue=0.05,returned_genenumber=5) {
-	require(KEGG.db)
+#	require(KEGG.db)
 	keggpathway2gene <- as.list(KEGGPATHID2EXTID)
 	pathway2name<-as.list(KEGGPATHID2NAME)
 	keggpathway2gene<-keggpathway2gene[names(keggpathway2gene)[grep(specis,names(keggpathway2gene))]]
