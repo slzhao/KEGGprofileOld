@@ -2,7 +2,7 @@
 \alias{col_by_value}
 \title{col_by_value}
 \usage{
-  col_by_value(x, col, range = NA, breaks = NA)
+col_by_value(x, col, range = NA, breaks = NA, showColorBar = T)
 }
 \arguments{
   \item{x}{a numeric matrix}
@@ -16,21 +16,23 @@
   \item{breaks}{a numeric vector of three or more cut
   points giving the number of intervals into which x is to
   be cut. See also 'Details'}
+
+  \item{showColorBar}{Logical. Indicates display the
+  colorbar or not. The default value is TURE.}
 }
 \value{
-  a matrix equal to x, but the values were instead by
-  colors.
+a matrix equal to x, but the values were instead by colors.
 }
 \description{
-  The function will transfer a numeric matrix into a matrix
-  of colors, in which the colors represent the values of
-  numeric matrix
+The function will transfer a numeric matrix into a matrix
+of colors, in which the colors represent the values of
+numeric matrix
 }
 \details{
-  A colorbar would also be ploted. The returned colors of
-  the function can be used in function plot_profile. if
-  breaks not equal to NA, col must have the same length
-  with breaks-1.
+A colorbar would also be ploted. The returned colors of the
+function can be used in function plot_profile. if breaks
+not equal to NA, col must have the same length with
+breaks-1.
 }
 \examples{
 data(pho_sites_count)

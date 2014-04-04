@@ -2,8 +2,8 @@
 \alias{download_KEGGfile}
 \title{download_KEGGfile}
 \usage{
-  download_KEGGfile(pathway_id = "00010", specis = "hsa",
-    target_dir = getwd())
+download_KEGGfile(pathway_id = "00010", specis = "hsa",
+  target_dir = getwd())
 }
 \arguments{
   \item{pathway_id}{the KEGG pathway id, such as '00010'}
@@ -15,13 +15,13 @@
   downloaded files are saved}
 }
 \description{
-  The function download XML files and png files from KEGG
-  website to local disk
+The function download XML files and png files from KEGG
+website to local disk
 }
 \details{
-  If pathway_id is set as 'all', all KEGG pathway ids in
-  KEGG.db package will be used and downloaded from KEGG
-  website
+If pathway_id is set as 'all', all KEGG pathway ids in
+KEGG.db package will be used and downloaded from KEGG
+website
 }
 \examples{
 download_KEGGfile(pathway_id="00010",specis='hsa')

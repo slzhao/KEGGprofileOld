@@ -2,9 +2,8 @@
 \alias{plot_pathway}
 \title{plot_pathway}
 \usage{
-  plot_pathway(gene_expr, line_col, groups,
-    pathway_id = "00010", specis = "hsa", pathway_min = 5,
-    database_dir = getwd(), ...)
+plot_pathway(gene_expr, line_col, groups, pathway_id = "00010",
+  specis = "hsa", pathway_min = 5, database_dir = getwd(), ...)
 }
 \arguments{
   \item{...}{any other Arguments for function plot_profile}
@@ -16,7 +15,7 @@
   samples in the pathway map, valid when type='lines'}
 
   \item{groups}{a character used to indicate expression
-  values from different samples}
+  values from different types of samples}
 
   \item{specis}{the specis id in KEGG database, 'hsa' means
   human, 'mmu' means mouse, 'rno' means rat, etc}
@@ -30,17 +29,17 @@
   \item{pathway_id}{the KEGG pathway id, such as '00010'}
 }
 \description{
-  A wrapper for function download_KEGGfile, parse_XMLfile
-  and plot_profile
+A wrapper for function download_KEGGfile, parse_XMLfile and
+plot_profile
 }
 \details{
-  This wrapper function is developed to make the
-  visualization process more easier. Firstly the existence
-  of XML file and png file would be checked, if not, the
-  download_KEGGfile function would be used to download the
-  files. Then the parse_XMLfile function would be used to
-  parse the XML file. At last the plot_profile function
-  would be used to generate the pathway map.
+This wrapper function is developed to make the
+visualization process more easier. Firstly the existence of
+XML file and png file would be checked, if not, the
+download_KEGGfile function would be used to download the
+files. Then the parse_XMLfile function would be used to
+parse the XML file. At last the plot_profile function would
+be used to generate the pathway map.
 }
 \examples{
 data(pro_pho_expr)
@@ -58,14 +57,14 @@ temp<-plot_pathway(pho_expr,type="bg",bg_col=col,text_col="white",magnify=1.2,sp
 set.seed(124)
 testData1<-rbind(rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6),rnorm(6))
 row.names(testData1)<-c("4967","55753","1743","8802","47","50","C15972","C16255")
-colnames(testData1)<-c("Normal0","Normal2","Normal5","Sample0","Sample2","Sample5")
-temp<-plot_pathway(testData1,type="lines",line_col=c("brown1","seagreen3"),groups=c(rep("Control",3),rep("Disease",3)),magnify=1.2,specis='hsa',database_dir=system.file("extdata",package="KEGGprofile"),pathway_id="00020",max_dist=2)
+colnames(testData1)<-c("Control0","Control2","Control5","Sample0","Sample2","Sample5")
+temp<-plot_pathway(testData1,type="lines",line_col=c("brown1","seagreen3"),groups=c(rep("Control",3),rep("Sample",3)),magnify=1.2,specis='hsa',database_dir=system.file("extdata",package="KEGGprofile"),pathway_id="00020",max_dist=2)
 testData2<-testData1[,4:6]-testData1[,1:3]
 col<-col_by_value(testData2,col=colorRampPalette(c('green','black','red'))(1024),range=c(-2,2))
 temp<-plot_pathway(testData2,type="bg",bg_col=col,text_col="white",magnify=1.2,specis='hsa',database_dir=system.file("extdata",package="KEGGprofile"),pathway_id="00020")
 }
 \seealso{
-  \code{\link{download_KEGGfile}},
-  \code{\link{parse_XMLfile}}, \code{\link{plot_profile}}
+\code{\link{download_KEGGfile}},
+\code{\link{parse_XMLfile}}, \code{\link{plot_profile}}
 }
 

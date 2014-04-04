@@ -1,3 +1,12 @@
+2014-03-30
+KEGGprofile 1.3.3: Improvement for the web interface.
+
+2014-03-18
+KEGGprofile 1.3.2: New function plot_pathway_cor: Caculating correlations between groups in each pathway and comparing with the correlations for other genes.
+
+2014-02-10
+KEGGprofile 1.3.1: Compound data was also supported; The parameters were modified for web interface.
+
 2012-09-19
 KEGGprofile 0.99.2: Improvement in processing expression matrix with only one time point
 
