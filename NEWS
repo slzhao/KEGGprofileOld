@@ -1,53 +1,135 @@
-2014-09-15
-KEGGprofile 1.7.6: New function: Downloading the latest pathway/gene link from KEGG website.
+CHANGES IN VERSION 1.9.1
+------------------------
 
-2014-07-16
-KEGGprofile 1.7.5: Changes in examples.
+    o Fix a bug when pathway_min is set to 1. Thanks Norbert Auer.
 
-2014-06-08
-KEGGprofile 1.7.4: Improvement for documents and examples.
+CHANGES IN VERSION 1.7.7
+------------------------
 
-2014-03-30
-KEGGprofile 1.7.3: Improvement for the web interface.
+NEW FEATURES
 
-2014-03-18
-KEGGprofile 1.7.2: New function plot_pathway_cor: Caculating correlations between groups in each pathway and comparing with the correlations for other genes.
+    o New function: The pathway map without species information can be used as reference map with parameter speciesRefMap.
 
-2014-02-10
-KEGGprofile 1.7.1: Compound data was also supported; The parameters were modified for web interface.
+CHANGES IN VERSION 1.7.6
+------------------------
 
-2012-09-19
-KEGGprofile 0.99.2: Improvement in processing expression matrix with only one time point
+NEW FEATURES
 
-2012-06-29
-KEGGprofile 0.99.1: Add the param lwd when type='lines' 
+    o New function: Downloading the latest pathway/gene link from KEGG website.
 
-2012-06-28
-KEGGprofile 0.99.0: Improvement in the description of this package. Add notes for users in plot_profile function
+CHANGES IN VERSION 1.7.5
 
-2012-05-12
-KEGGprofile 0.1.2: Improvement in the codes of vignette file and re-submit to bioconductor as the final version
+NEW FEATURES
 
-2012-03-22
-KEGGprofile 0.1.0: Submit to bioconductor
+    o Changes in examples.
 
-2012-03-21
-KEGGprofile 0.0.7: Finish the vignette file
+CHANGES IN VERSION 1.7.4
+------------------------
 
-2012-03-20
-KEGGprofile 0.0.6: Improvement in help file and example source
+NEW FEATURES
 
-2012-03-08
-KEGGprofile 0.0.5: Add return value for plot_pathway function; Release to my colleague
+    o Improvement for documents and examples.
 
-2012-03-04
-KEGGprofile 0.0.4: Finish help files and example source
+CHANGES IN VERSION 1.7.3
+------------------------
 
-2012-03-03
-KEGGprofile 0.0.3: Add example data files
+NEW FEATURES
 
-2012-02-29
-KEGGprofile 0.0.2: Improvement in figure details
+    o Improvement for the web interface.
 
-2012-02-26
-KEGGprofile 0.0.1: Build 'KEGGprofile' package by CMD Install and CMD check
+CHANGES IN VERSION 1.7.2
+------------------------
+
+NEW FEATURES
+
+    o New function plot_pathway_cor: Caculating correlations between groups in each pathway and comparing with the correlations for other genes.
+
+CHANGES IN VERSION 1.7.1
+------------------------
+
+NEW FEATURES
+
+    o Compound data was also supported; The parameters were modified for web interface.
+
+CHANGES IN VERSION 0.99.2
+-------------------------
+
+NEW FEATURES    
+
+    o Improvement in processing expression matrix with only one time point
+
+CHANGES IN VERSION 0.99.1
+-------------------------
+
+NEW FEATURES
+
+    o Add the parameter lwd when type='lines' 
+
+CHANGES IN VERSION 0.99.0
+-------------------------
+
+NEW FEATURES
+
+    o Improvement in the description of this package. Add notes for users in plot_profile function
+
+CHANGES IN VERSION 0.1.2
+------------------------
+
+    o Improvement in the codes of vignette file and re-submit to bioconductor as the final version
+
+CHANGES IN VERSION 0.1.0
+------------------------
+
+NEW FEATURES
+
+    o Submit to bioconductor
+
+CHANGES IN VERSION 0.0.7
+------------------------
+
+NEW FEATURES
+
+    o Finish the vignette file
+
+CHANGES IN VERSION 0.0.6
+------------------------
+
+NEW FEATURES
+
+    o Improvement in help file and example source
+
+CHANGES IN VERSION 0.0.5
+------------------------
+
+NEW FEATURES
+
+    o Add return value for plot_pathway function; Release to my colleague
+
+CHANGES IN VERSION 0.0.4
+-------------------------
+
+NEW FEATURES
+
+    o Finish help files and example source
+
+CHANGES IN VERSION 0.0.3
+------------------------
+
+NEW FEATURES
+
+    o Add example data files
+
+CHANGES IN VERSION 0.0.2
+------------------------
+
+NEW FEATURES
+
+    o Improvement in figure details
+
+CHANGES IN VERSION 0.0.1
+------------------------
+
+NEW FEATURES
+
+
+    o Build 'CHANGES IN VERSION' package by CMD Install and CMD check
